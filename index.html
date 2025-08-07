@@ -24,8 +24,15 @@
     .row{display:flex;gap:12px;flex-wrap:wrap}
     .card{background:rgba(15,23,42,.8);backdrop-filter: blur(8px);border:1px solid rgba(148,163,184,.15);padding:14px;border-radius:var(--radius)}
     .controls{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
-    button, select, input[type="date"]{background:#0b1221;border:1px solid rgba(148,163,184,.28);color:var(--text);height:36px;border-radius:12px;padding:0 12px;cursor:pointer}
+    button, select, input[type="date"], input[type="text"], input[type="number"], textarea{background:#0b1221;border:1px solid rgba(148,163,184,.28);color:var(--text);height:36px;border-radius:12px;padding:0 12px;cursor:pointer}
+    textarea{height:auto;padding:10px;border-radius:12px}
     button.primary{background:linear-gradient(135deg,var(--accent),var(--accent2));border:none;color:#061017;font-weight:700}
+
+    /* Tabs */
+    .tabs{display:flex;gap:8px;margin:6px 0 12px}
+    .tab{background:rgba(15,23,42,.8);border:1px solid rgba(148,163,184,.25);color:var(--text);padding:8px 12px;border-radius:12px;cursor:pointer}
+    .tab.active{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#061017;border:none;font-weight:700}
+    .hidden{display:none!important}
 
     /* Grid */
     .grid{width:100%;overflow:auto;border-radius:var(--radius);border:1px solid rgba(148,163,184,.15)}
@@ -49,6 +56,17 @@
     .bar{flex:1;height:10px;border-radius:999px;background:rgba(148,163,184,.18);overflow:hidden}
     .bar > i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--accent),var(--accent2))}
     .label{min-width:140px;color:#c7d2fe;font-weight:600}
+
+    /* Tasks */
+    .task-inputs{display:flex;gap:8px;flex-wrap:wrap;margin:8px 0}
+    .list{margin-top:8px}
+    .task{display:flex;align-items:center;gap:8px;padding:8px;border:1px solid rgba(148,163,184,.2);border-radius:12px;background:rgba(2,6,23,.35)}
+    .task input[type="text"]{flex:1;height:36px}
+    .badge{font-size:12px;color:#a5b4fc}
+    details{border:1px solid rgba(148,163,184,.2);border-radius:12px;padding:8px;background:rgba(2,6,23,.25)}
+    details > summary{cursor:pointer;font-weight:600;color:#c7d2fe;list-style:none}
+    details > summary::-webkit-details-marker{display:none}
+    .section-title{font-weight:700;color:#c7d2fe;margin:10px 0 6px}
   </style>
 </head>
 <body>
@@ -71,42 +89,81 @@
       </div>
     </header>
 
-    <div class="row" style="margin:8px 0 14px">
-      <div class="card" style="flex:1;min-width:280px">
-        <div class="progress-row" style="margin-bottom:8px">
-          <div class="label">Physical Energy</div>
-          <div class="progress" style="min-width:240px">
-            <div class="bar"><i id="bar-physical"></i></div>
-            <div id="pct-physical" style="width:46px;text-align:right"></div>
-          </div>
-        </div>
-        <div class="progress-row">
-          <div class="label">Mental Energy</div>
-          <div class="progress" style="min-width:240px">
-            <div class="bar"><i id="bar-mental"></i></div>
-            <div id="pct-mental" style="width:46px;text-align:right"></div>
-          </div>
-        </div>
-      </div>
-      <div class="card" style="display:flex;gap:10px;align-items:center">
-        <button id="resetBtn">Reset 21‑day run</button>
-        <button id="exportBtn">Export</button>
-        <input id="importInput" type="file" accept="application/json" style="display:none" />
-        <button id="importBtn">Import</button>
-      </div>
+    <!-- Tabs -->
+    <div class="tabs">
+      <button id="tab-tracker" class="tab active">Tracker</button>
+      <button id="tab-tasks" class="tab">Tasks</button>
     </div>
 
-    <div class="grid card">
-      <table id="grid">
-        <thead>
-          <tr>
-            <th class="section">Item</th>
-            <th>Day 1</th><th>Day 2</th><th>Day 3</th><th>Day 4</th><th>Day 5</th><th>Day 6</th><th>Day 7</th>
-          </tr>
-        </thead>
-        <tbody id="tbody"></tbody>
-      </table>
-    </div>
+    <!-- TRACKER VIEW -->
+    <section id="view-tracker">
+      <div class="row" style="margin:8px 0 14px">
+        <div class="card" style="flex:1;min-width:280px">
+          <div class="progress-row" style="margin-bottom:8px">
+            <div class="label">Physical Energy</div>
+            <div class="progress" style="min-width:240px">
+              <div class="bar"><i id="bar-physical"></i></div>
+              <div id="pct-physical" style="width:46px;text-align:right"></div>
+            </div>
+          </div>
+          <div class="progress-row">
+            <div class="label">Mental Energy</div>
+            <div class="progress" style="min-width:240px">
+              <div class="bar"><i id="bar-mental"></i></div>
+              <div id="pct-mental" style="width:46px;text-align:right"></div>
+            </div>
+          </div>
+        </div>
+        <div class="card" style="display:flex;gap:10px;align-items:center">
+          <button id="resetBtn">Reset 21‑day run</button>
+          <button id="exportBtn">Export</button>
+          <input id="importInput" type="file" accept="application/json" style="display:none" />
+          <button id="importBtn">Import</button>
+        </div>
+      </div>
+
+      <div class="grid card">
+        <table id="grid">
+          <thead>
+            <tr>
+              <th class="section">Item</th>
+              <th>Day 1</th><th>Day 2</th><th>Day 3</th><th>Day 4</th><th>Day 5</th><th>Day 6</th><th>Day 7</th>
+            </tr>
+          </thead>
+          <tbody id="tbody"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- TASKS VIEW -->
+    <section id="view-tasks" class="hidden">
+      <div class="card">
+        <div class="section-title">Add Task</div>
+        <div class="task-inputs">
+          <input id="task-title" type="text" placeholder="Task title" style="flex:1" />
+          <label style="display:flex;align-items:center;gap:6px"><input id="task-low" type="checkbox" /> Low priority</label>
+          <button id="task-add" class="primary">Add</button>
+        </div>
+        <div class="badge">Tasks are ordered by priority (1 = highest). New tasks default to lowest priority.</div>
+      </div>
+
+      <div class="row" style="margin-top:10px">
+        <div class="card" style="flex:1;min-width:320px">
+          <div class="section-title">High Priority (Top 3)</div>
+          <div id="list-top3" class="list"></div>
+        </div>
+        <div class="card" style="flex:1;min-width:320px">
+          <details open>
+            <summary>Low Priority (Brain dump)</summary>
+            <div id="list-low" class="list" style="margin-top:8px"></div>
+          </details>
+          <details style="margin-top:10px">
+            <summary>Completed</summary>
+            <div id="list-done" class="list" style="margin-top:8px"></div>
+          </details>
+        </div>
+      </div>
+    </section>
 
     <footer style="margin-top:10px;color:#94a3b8;font-size:12px">
       Data is stored locally on your device via <code>localStorage</code>. Export a backup if needed.
@@ -115,185 +172,154 @@
 
 <script>
 (function(){
-  // Categories & sub-items (Purpose removed for now)
+  // ====== TRACKER (existing) ======
   const CATEGORIES = [
-    {
-      key: 'physical', label: 'Physical Energy', color: 'accent',
-      items: [
-        { key:'mealprep', label:'Meal Prep' },
-        { key:'sleep', label:'Sleep' }
-      ]
-    },
-    {
-      key: 'mental', label: 'Mental Energy', color: 'purple',
-      items: [
-        { key:'screen', label:'< 2h Screen Time' },
-        { key:'journal', label:'Journaling' }
-      ]
-    }
+    { key: 'physical', label: 'Physical Energy', color: 'accent', items: [
+      { key:'mealprep', label:'Meal Prep' },
+      { key:'sleep', label:'Sleep' }
+    ]},
+    { key: 'mental', label: 'Mental Energy', color: 'purple', items: [
+      { key:'screen', label:'< 2h Screen Time' },
+      { key:'journal', label:'Journaling' }
+    ]}
   ];
-
-  const DAYS = 21; // total run
-
-  // Flatten items with category mapping
-  const ITEMS = [];
-  CATEGORIES.forEach((cat, cIdx) => {
-    cat.items.forEach(it => ITEMS.push({ ...it, catIndex:cIdx }));
-  });
-
-  const el = (sel) => document.querySelector(sel);
+  const DAYS = 21;
+  const ITEMS = []; CATEGORIES.forEach((cat,cIdx)=>cat.items.forEach(it=>ITEMS.push({...it,catIndex:cIdx})));
+  const el = (s)=>document.querySelector(s);
   const gridBody = el('#tbody');
   const startDateInput = el('#startDate');
   const weekSelect = el('#weekSelect');
-
   const STORAGE_KEY = 'momentum.v2';
   const state = load() || initState();
-
-  function initState(){
-    const today = new Date();
-    const startISO = today.toISOString().slice(0,10);
-    return {
-      start: startISO,
-      checks: Array.from({length: ITEMS.length}, () => Array(DAYS).fill(false))
-    };
-  }
-
-  function load(){
-    try{ return JSON.parse(localStorage.getItem(STORAGE_KEY)); }catch(e){ return null; }
-  }
+  function initState(){ const startISO=new Date().toISOString().slice(0,10); return {start:startISO,checks:Array.from({length:ITEMS.length},()=>Array(DAYS).fill(false))}; }
+  function load(){ try{return JSON.parse(localStorage.getItem(STORAGE_KEY));}catch(e){return null;} }
   function save(){ localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }
-
-  function setStartDate(iso){ state.start = iso; save(); render(); }
-
-  function currentDayIndex(){
-    const s = new Date(state.start + 'T00:00:00');
-    const now = new Date();
-    const diff = Math.floor((now - s) / (1000*60*60*24));
-    return Math.min(Math.max(diff, 0), DAYS-1);
-  }
-
-  function dayLabel(i){ return 'Day ' + (i+1); }
-
-  function buildWeek(offset){
-    gridBody.innerHTML = '';
-    const start = offset;
-    const end = Math.min(offset + 7, DAYS);
-
-    // header labels
-    const thead = document.querySelector('thead tr');
-    thead.innerHTML = '<th class="section">Item</th>' +
-      Array.from({length: end-start}, (_,i)=>`<th>${dayLabel(start+i)}</th>`).join('');
-
-    // rows grouped by category
-    let rowIndex = 0; // maps into state.checks
-    CATEGORIES.forEach((cat, cIdx) => {
-      // Category header row
-      const catTr = document.createElement('tr');
-      catTr.className = 'cat-row';
-      const catTd = document.createElement('td');
-      catTd.colSpan = (end-start) + 1; // item column + days
-      catTd.textContent = cat.label;
-      catTr.appendChild(catTd);
-      gridBody.appendChild(catTr);
-
-      // Item rows
-      cat.items.forEach((it) => {
-        const tr = document.createElement('tr');
-        const left = document.createElement('td');
-        left.className = 'section';
-        left.textContent = it.label;
-        tr.appendChild(left);
-
-        for(let d=start; d<end; d++){
-          const td = document.createElement('td');
-          const btn = document.createElement('div');
-          const checked = state.checks[rowIndex][d];
-          btn.className = 'check' + (checked ? ' checked' : '');
-          btn.setAttribute('role','checkbox');
-          btn.setAttribute('aria-checked', checked);
-          btn.title = `${cat.label} – ${it.label} – ${dayLabel(d)}`;
-          btn.textContent = checked ? '✓' : '';
-          btn.addEventListener('click', () => {
-            state.checks[rowIndex][d] = !state.checks[rowIndex][d];
-            save();
-            renderProgress();
-            btn.classList.toggle('checked');
-            btn.textContent = state.checks[rowIndex][d] ? '✓' : '';
-            btn.setAttribute('aria-checked', state.checks[rowIndex][d]);
-          });
-          const box = document.createElement('div');
-          box.className = 'box';
-          box.appendChild(btn);
-          td.appendChild(box);
-          tr.appendChild(td);
-        }
-        gridBody.appendChild(tr);
-        rowIndex++;
-      });
+  function setStartDate(iso){ state.start=iso; save(); render(); }
+  function currentDayIndex(){ const s=new Date(state.start+'T00:00:00'); const now=new Date(); const diff=Math.floor((now-s)/(1000*60*60*24)); return Math.min(Math.max(diff,0),DAYS-1); }
+  function dayLabel(i){ return 'Day '+(i+1); }
+  function buildWeek(offset){ gridBody.innerHTML=''; const start=offset; const end=Math.min(offset+7,DAYS);
+    const thead=document.querySelector('thead tr'); thead.innerHTML='<th class="section">Item</th>'+Array.from({length:end-start},(_,i)=>`<th>${dayLabel(start+i)}</th>`).join('');
+    let rowIndex=0;
+    CATEGORIES.forEach((cat)=>{
+      const catTr=document.createElement('tr'); catTr.className='cat-row'; const catTd=document.createElement('td'); catTd.colSpan=(end-start)+1; catTd.textContent=cat.label; catTr.appendChild(catTd); gridBody.appendChild(catTr);
+      cat.items.forEach((it)=>{ const tr=document.createElement('tr'); const left=document.createElement('td'); left.className='section'; left.textContent=it.label; tr.appendChild(left);
+        for(let d=start; d<end; d++){ const td=document.createElement('td'); const btn=document.createElement('div'); const checked=state.checks[rowIndex][d]; btn.className='check'+(checked?' checked':''); btn.setAttribute('role','checkbox'); btn.setAttribute('aria-checked',checked); btn.title=`${cat.label} – ${it.label} – ${dayLabel(d)}`; btn.textContent=checked?'✓':''; btn.addEventListener('click',()=>{ state.checks[rowIndex][d]=!state.checks[rowIndex][d]; save(); renderCategoryProgress(); btn.classList.toggle('checked'); btn.textContent=state.checks[rowIndex][d]?'✓':''; btn.setAttribute('aria-checked', state.checks[rowIndex][d]); }); const box=document.createElement('div'); box.className='box'; box.appendChild(btn); td.appendChild(box); tr.appendChild(td);} gridBody.appendChild(tr); rowIndex++; });
     });
   }
+  function renderCategoryProgress(){ CATEGORIES.forEach((cat,cIdx)=>{ const idxs=ITEMS.map((it,idx)=>it.catIndex===cIdx?idx:-1).filter(i=>i!==-1); const total=idxs.length*DAYS; const done=idxs.reduce((a,idx)=>a+state.checks[idx].filter(Boolean).length,0); const pct= total? Math.round((done/total)*100):0; const bar=document.querySelector('#bar-'+cat.key); const txt=document.querySelector('#pct-'+cat.key); if(bar) bar.style.width=pct+'%'; if(txt) txt.textContent=pct+'%'; }); }
+  function render(){ startDateInput.value=state.start; const weekOffset=Math.floor(currentDayIndex()/7)*7; weekSelect.value=String(weekOffset); buildWeek(weekOffset); renderCategoryProgress(); }
+  startDateInput.addEventListener('change',e=>setStartDate(e.target.value));
+  weekSelect.addEventListener('change',e=>{ buildWeek(parseInt(e.target.value,10)); });
+  document.querySelector('#todayBtn').addEventListener('click',()=>{ render(); });
+  document.querySelector('#resetBtn').addEventListener('click',()=>{ if(confirm('Reset your 21‑day run? This clears all checkmarks.')){ const startISO=new Date().toISOString().slice(0,10); state.start=startISO; state.checks=Array.from({length:ITEMS.length},()=>Array(DAYS).fill(false)); save(); render(); }});
+  document.querySelector('#exportBtn').addEventListener('click',()=>{ const blob=new Blob([JSON.stringify(state,null,2)],{type:'application/json'}); const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download='momentum-data.json'; a.click(); URL.revokeObjectURL(url); });
+  document.querySelector('#importBtn').addEventListener('click',()=>document.querySelector('#importInput').click());
+  document.querySelector('#importInput').addEventListener('change',async(e)=>{ const file=e.target.files[0]; if(!file) return; try{ const text=await file.text(); const data=JSON.parse(text); if(!data.start||!Array.isArray(data.checks)) throw new Error('Invalid file'); localStorage.setItem(STORAGE_KEY, JSON.stringify(data)); location.reload(); }catch(err){ alert('Could not import file.'); }});
 
-  function renderCategoryProgress(){
-    // Compute % per category
-    CATEGORIES.forEach((cat, cIdx) => {
-      const itemIndexes = ITEMS.map((it, idx) => it.catIndex === cIdx ? idx : -1).filter(i => i !== -1);
-      const total = itemIndexes.length * DAYS;
-      const done = itemIndexes.reduce((acc, idx) => acc + state.checks[idx].filter(Boolean).length, 0);
-      const pct = total ? Math.round((done/total)*100) : 0;
-      const bar = document.querySelector('#bar-' + cat.key);
-      const txt = document.querySelector('#pct-' + cat.key);
-      if(bar){ bar.style.width = pct + '%'; }
-      if(txt){ txt.textContent = pct + '%'; }
+  // ====== TASKS ======
+  const TASKS_KEY = 'momentum.tasks.v1';
+  let tasks = loadTasks();
+  function loadTasks(){ try{ return JSON.parse(localStorage.getItem(TASKS_KEY)) || []; }catch(e){ return []; } }
+  function saveTasks(){ localStorage.setItem(TASKS_KEY, JSON.stringify(tasks)); }
+
+  function nextId(){ return Date.now()+Math.random().toString(16).slice(2); }
+
+  function addTask(title, low=false){
+    const ranked = tasks.filter(t=>!t.completed && !t.low);
+    const newRank = ranked.length + 1; // default lowest among ranked
+    const t = { id: nextId(), title: title.trim(), low, completed:false, rank: low? null : newRank, createdAt: Date.now() };
+    tasks.push(t); saveTasks(); renderTasks();
+  }
+
+  function setRank(id, newRank){
+    // Only for active, non-low tasks
+    const act = tasks.filter(t=>!t.completed && !t.low).sort((a,b)=>a.rank-b.rank);
+    const maxRank = act.length; if(newRank<1) newRank=1; if(newRank>maxRank) newRank=maxRank;
+    const target = tasks.find(t=>t.id===id); if(!target) return;
+    const oldRank = target.rank;
+    if(oldRank===newRank) return;
+    // Shift others
+    act.forEach(t=>{
+      if(t.id===id) return;
+      if(newRank < oldRank){ // moving up
+        if(t.rank >= newRank && t.rank < oldRank) t.rank++;
+      } else { // moving down
+        if(t.rank <= newRank && t.rank > oldRank) t.rank--;
+      }
     });
+    target.rank = newRank;
+    saveTasks(); renderTasks();
   }
 
-  function render(){
-    startDateInput.value = state.start;
-    const todayIdx = currentDayIndex();
-    const weekOffset = Math.floor(todayIdx/7)*7;
-    weekSelect.value = String(weekOffset);
+  function promoteFromLow(id){ const t=tasks.find(x=>x.id===id); if(!t) return; t.low=false; const ranked=tasks.filter(k=>!k.completed && !k.low); t.rank=ranked.length+1; saveTasks(); renderTasks(); }
+  function demoteToLow(id){ const t=tasks.find(x=>x.id===id); if(!t) return; // compact ranks
+    if(t.rank!=null){ const act=tasks.filter(a=>!a.completed && !a.low).sort((a,b)=>a.rank-b.rank); act.forEach(a=>{ if(a.rank>t.rank) a.rank--; }); }
+    t.low=true; t.rank=null; saveTasks(); renderTasks(); }
+  function completeTask(id){ const t=tasks.find(x=>x.id===id); if(!t) return; t.completed=true; t.completedAt=Date.now(); // compact ranks if needed
+    if(t.rank!=null){ const act=tasks.filter(a=>!a.completed && !a.low).sort((a,b)=>a.rank-b.rank); act.forEach(a=>{ if(a.rank>t.rank) a.rank--; }); }
+    t.rank=null; saveTasks(); renderTasks(); }
+  function deleteTask(id){ tasks = tasks.filter(t=>t.id!==id); saveTasks(); renderTasks(); }
+  function editTitle(id, val){ const t=tasks.find(x=>x.id===id); if(!t) return; t.title=val; saveTasks(); }
 
-    // Build week grid
-    buildWeek(weekOffset);
-    renderCategoryProgress();
+  function renderTasks(){
+    const top3El = document.getElementById('list-top3');
+    const lowEl = document.getElementById('list-low');
+    const doneEl = document.getElementById('list-done');
+    top3El.innerHTML = lowEl.innerHTML = doneEl.innerHTML = '';
+
+    const activeRanked = tasks.filter(t=>!t.completed && !t.low).sort((a,b)=>a.rank-b.rank);
+    const top3 = activeRanked.slice(0,3);
+    const low = tasks.filter(t=>!t.completed && t.low).sort((a,b)=>a.createdAt-b.createdAt);
+    const done = tasks.filter(t=>t.completed).sort((a,b)=>b.completedAt-a.completedAt);
+
+    top3.forEach(t=> top3El.appendChild(taskRow(t, true)) );
+    low.forEach(t=> lowEl.appendChild(taskRow(t, false)) );
+    done.forEach(t=> doneEl.appendChild(taskRow(t, false, true)) );
   }
 
-  // controls
-  startDateInput.addEventListener('change', e => setStartDate(e.target.value));
-  weekSelect.addEventListener('change', e => { buildWeek(parseInt(e.target.value,10)); });
-  document.querySelector('#todayBtn').addEventListener('click', () => { render(); });
-  document.querySelector('#resetBtn').addEventListener('click', () => {
-    if(confirm('Reset your 21‑day run? This clears all checkmarks.')){
-      const startISO = new Date().toISOString().slice(0,10);
-      state.start = startISO;
-      state.checks = Array.from({length: ITEMS.length}, () => Array(DAYS).fill(false));
-      save();
-      render();
+  function taskRow(t, showRank=false, completed=false){
+    const row = document.createElement('div'); row.className='task';
+    if(showRank){
+      const num = document.createElement('input'); num.type='number'; num.min='1'; num.value=t.rank||1; num.style.width='64px'; num.title='Priority (1 = highest)';
+      num.addEventListener('change', ()=> setRank(t.id, parseInt(num.value,10)) );
+      row.appendChild(num);
     }
+    const txt = document.createElement('input'); txt.type='text'; txt.value=t.title; txt.placeholder='Task'; txt.addEventListener('change', ()=> editTitle(t.id, txt.value)); txt.style.flex='1'; row.appendChild(txt);
+
+    if(!completed){
+      if(t.low){
+        const up = document.createElement('button'); up.textContent='Promote'; up.addEventListener('click', ()=> promoteFromLow(t.id)); row.appendChild(up);
+      } else {
+        const down = document.createElement('button'); down.textContent='Low'; down.addEventListener('click', ()=> demoteToLow(t.id)); row.appendChild(down);
+      }
+      const done = document.createElement('button'); done.textContent='Done'; done.addEventListener('click', ()=> completeTask(t.id)); row.appendChild(done);
+    } else {
+      const del = document.createElement('button'); del.textContent='Delete'; del.addEventListener('click', ()=> deleteTask(t.id)); row.appendChild(del);
+    }
+    return row;
+  }
+
+  // Add task handlers
+  document.getElementById('task-add').addEventListener('click', ()=>{
+    const title = document.getElementById('task-title').value.trim();
+    const low = document.getElementById('task-low').checked;
+    if(!title) return alert('Enter a task title');
+    addTask(title, low);
+    document.getElementById('task-title').value='';
+    document.getElementById('task-low').checked=false;
   });
 
-  // export / import
-  document.querySelector('#exportBtn').addEventListener('click', () => {
-    const blob = new Blob([JSON.stringify(state,null,2)], {type:'application/json'});
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url; a.download = 'momentum-data.json'; a.click();
-    URL.revokeObjectURL(url);
-  });
-  document.querySelector('#importBtn').addEventListener('click', () => document.querySelector('#importInput').click());
-  document.querySelector('#importInput').addEventListener('change', async (e) => {
-    const file = e.target.files[0];
-    if(!file) return;
-    try{
-      const text = await file.text();
-      const data = JSON.parse(text);
-      if(!data.start || !Array.isArray(data.checks)) throw new Error('Invalid file');
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
-      location.reload();
-    }catch(err){ alert('Could not import file.'); }
-  });
+  // Tabs logic
+  const tabTracker = document.getElementById('tab-tracker');
+  const tabTasks = document.getElementById('tab-tasks');
+  const viewTracker = document.getElementById('view-tracker');
+  const viewTasks = document.getElementById('view-tasks');
+  tabTracker.addEventListener('click', ()=>{ tabTracker.classList.add('active'); tabTasks.classList.remove('active'); viewTracker.classList.remove('hidden'); viewTasks.classList.add('hidden'); });
+  tabTasks.addEventListener('click', ()=>{ tabTasks.classList.add('active'); tabTracker.classList.remove('active'); viewTasks.classList.remove('hidden'); viewTracker.classList.add('hidden'); renderTasks(); });
 
+  // initial renders
   render();
+  renderTasks();
 })();
 </script>
 </body>
