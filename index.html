@@ -18,18 +18,20 @@
     html,body{height:100%}
     body{margin:0;background:linear-gradient(180deg,#0b1221 0%, #0d1426 100%);color:var(--text);font:16px/1.45 -apple-system,BlinkMacSystemFont,Inter,Segoe UI,Roboto,Helvetica,Arial,sans-serif;-webkit-font-smoothing:antialiased}
     .wrap{max-width:1100px;margin:0 auto;padding:env(safe-area-inset-top) 16px calc(24px + env(safe-area-inset-bottom));}
-    header{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:10px 0 12px}
+    header{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:10px 0 12px;flex-wrap:wrap}
     h1{font-size:22px;margin:0;font-weight:700}
     .sub{color:var(--muted);font-size:13px}
     .row{display:flex;gap:12px;flex-wrap:wrap}
     .card{background:rgba(15,23,42,.8);backdrop-filter: blur(8px);border:1px solid rgba(148,163,184,.15);padding:14px;border-radius:var(--radius)}
     .controls{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
-    button, select, input[type="date"], input[type="text"], input[type="number"], textarea{background:#0b1221;border:1px solid rgba(148,163,184,.28);color:var(--text);height:36px;border-radius:12px;padding:0 12px;cursor:pointer}
+    button, select, input[type="date"], input[type="text"], input[type="number"], textarea{
+      background:#0b1221;border:1px solid rgba(148,163,184,.28);color:var(--text);height:36px;border-radius:12px;padding:0 12px;cursor:pointer
+    }
     textarea{height:auto;padding:10px;border-radius:12px}
     button.primary{background:linear-gradient(135deg,var(--accent),var(--accent2));border:none;color:#061017;font-weight:700}
 
     /* Tabs */
-    .tabs{display:flex;gap:8px;margin:6px 0 12px}
+    .tabs{display:flex;gap:8px;margin:6px 0 12px;flex-wrap:wrap}
     .tab{background:rgba(15,23,42,.8);border:1px solid rgba(148,163,184,.25);color:var(--text);padding:8px 12px;border-radius:12px;cursor:pointer}
     .tab.active{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#061017;border:none;font-weight:700}
     .hidden{display:none!important}
@@ -46,12 +48,21 @@
     .section{white-space:nowrap}
     .cat-row td{font-weight:700;color:#c7d2fe;background:rgba(96,165,250,.08);border-top:2px solid rgba(148,163,184,.25)}
 
-    .box{display:flex;align-items:center;justify-content:center;gap:8px;user-select:none; pointer-events:auto}
+    /* Check cells */
     td{position:relative}
     .cell{position:relative; z-index:1}
-    .cell-overlay{position:absolute; inset:0}
-    .check{width:28px;height:28px;border-radius:10px;border:1.5px solid rgba(148,163,184,.45);display:inline-flex;align-items:center;justify-content:center;cursor:pointer;transition:.15s;background:rgba(2,6,23,.35)}
-    .check.checked{border-color:transparent;background:linear-gradient(135deg,var(--accent),var(--accent2));color:#0b1221;font-weight:800}
+    .box{display:flex;align-items:center;justify-content:center;gap:8px;user-select:none; pointer-events:auto}
+    .check{
+      width:28px;height:28px;border-radius:10px;
+      border:1.5px solid rgba(148,163,184,.45);
+      display:inline-flex;align-items:center;justify-content:center;
+      cursor:pointer;transition:.15s;background:rgba(2,6,23,.35)
+    }
+    .check.checked{
+      border-color:transparent;
+      background:linear-gradient(135deg,var(--accent),var(--accent2));
+      color:#0b1221;font-weight:800
+    }
 
     /* Progress */
     .progress-row{display:grid;grid-template-columns:1fr auto;gap:12px}
@@ -70,14 +81,22 @@
     details > summary{cursor:pointer;font-weight:600;color:#c7d2fe;list-style:none}
     details > summary::-webkit-details-marker{display:none}
     .section-title{font-weight:700;color:#c7d2fe;margin:10px 0 6px}
+
+    /* Streak badge */
+    .streak{display:flex;align-items:center;gap:6px;font-weight:700}
   </style>
 </head>
 <body>
   <div class="wrap">
     <header>
-      <div>
-        <h1>Daily Momentum Tracker</h1>
-        <div class="sub">Track tiny wins across <strong>Physical Energy</strong> and <strong>Mental Energy</strong>.</div>
+      <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+        <div>
+          <h1>Daily Momentum Tracker</h1>
+          <div class="sub">Track tiny wins across <strong>Physical Energy</strong> and <strong>Mental Energy</strong>.</div>
+        </div>
+        <div class="streak" aria-label="Current streak">
+          <span>🔥</span><span id="streakCount">0</span>
+        </div>
       </div>
       <div class="controls">
         <label style="display:flex;align-items:center;gap:8px">
@@ -118,7 +137,7 @@
           </div>
         </div>
         <div class="card" style="display:flex;gap:10px;align-items:center">
-          <button id="resetBtn">Reset 21‑day run</button>
+          <button id="resetBtn">Reset 21-day run</button>
           <button id="exportBtn">Export</button>
           <input id="importInput" type="file" accept="application/json" style="display:none" />
           <button id="importBtn">Import</button>
@@ -149,10 +168,9 @@
             <option value="Physical">Physical</option>
             <option value="Emotional">Emotional</option>
           </select>
-          <label style="display:flex;align-items:center;gap:6px"><input id="task-low" type="checkbox" /> Low priority</label>
           <button id="task-add" class="primary">Add</button>
         </div>
-        <div class="badge">Tasks are ordered by priority (1 = highest). New tasks default to lowest priority.</div>
+        <div class="badge">New tasks go to Low Priority by default. Promote when ready. (1 = highest rank)</div>
       </div>
 
       <div class="row" style="margin-top:10px">
@@ -180,99 +198,239 @@
 
 <script>
 (function(){
-  // ====== TRACKER (existing) ======
+  // ====== TRACKER ======
   const CATEGORIES = [
-    { key: 'physical', label: 'Physical Energy', color: 'accent', items: [
+    { key: 'physical', label: 'Physical Energy', items: [
       { key:'mealprep', label:'Meal Prep' },
       { key:'sleep', label:'Sleep' }
     ]},
-    { key: 'mental', label: 'Mental Energy', color: 'purple', items: [
-      { key:'screen', label:'< 2h Screen Time' },
+    { key: 'mental', label: 'Mental Energy', items: [
+      { key:'screen', label:'&lt; 2h Screen Time' },
       { key:'journal', label:'Journaling' }
     ]}
   ];
   const DAYS = 21;
+
+  // flatten items
   const ITEMS = []; CATEGORIES.forEach((cat,cIdx)=>cat.items.forEach(it=>ITEMS.push({...it,catIndex:cIdx})));
+
   const el = (s)=>document.querySelector(s);
   const gridBody = el('#tbody');
   const startDateInput = el('#startDate');
   const weekSelect = el('#weekSelect');
+
   const STORAGE_KEY = 'momentum.v2';
   const state = load() || initState();
-  function initState(){ const startISO=new Date().toISOString().slice(0,10); return {start:startISO,checks:Array.from({length:ITEMS.length},()=>Array(DAYS).fill(false))}; }
+
+  function initState(){
+    const startISO=new Date().toISOString().slice(0,10);
+    return { start:startISO, checks:Array.from({length:ITEMS.length},()=>Array(DAYS).fill(false)) };
+  }
   function load(){ try{return JSON.parse(localStorage.getItem(STORAGE_KEY));}catch(e){return null;} }
   function save(){ localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }
+
   function setStartDate(iso){ state.start=iso; save(); render(); }
   function currentDayIndex(){ const s=new Date(state.start+'T00:00:00'); const now=new Date(); const diff=Math.floor((now-s)/(1000*60*60*24)); return Math.min(Math.max(diff,0),DAYS-1); }
   function dayLabel(i){ return 'Day '+(i+1); }
-  function buildWeek(offset){ gridBody.innerHTML=''; const start=offset; const end=Math.min(offset+7,DAYS);
-    const thead=document.querySelector('thead tr'); thead.innerHTML='<th class="section">Item</th>'+Array.from({length:end-start},(_,i)=>`<th>${dayLabel(start+i)}</th>`).join('');
+
+  function buildWeek(offset){
+    gridBody.innerHTML='';
+    const start=offset; const end=Math.min(offset+7,DAYS);
+
+    // header labels
+    const thead=document.querySelector('thead tr');
+    thead.innerHTML='<th class="section">Item</th>'+Array.from({length:end-start},(_,i)=>`<th>${dayLabel(start+i)}</th>`).join('');
+
+    // rows grouped by category
     let rowIndex=0;
     CATEGORIES.forEach((cat)=>{
-      const catTr=document.createElement('tr'); catTr.className='cat-row'; const catTd=document.createElement('td'); catTd.colSpan=(end-start)+1; catTd.textContent=cat.label; catTr.appendChild(catTd); gridBody.appendChild(catTr);
-      cat.items.forEach((it)=>{ const tr=document.createElement('tr'); const left=document.createElement('td'); left.className='section'; left.textContent=it.label; tr.appendChild(left);
-        for(let d=start; d<end; d++){ const td=document.createElement('td'); td.className='cell'; const btn=document.createElement('div'); const checked=state.checks[rowIndex][d]; btn.className='check'+(checked?' checked':''); btn.setAttribute('role','checkbox'); btn.setAttribute('aria-checked',checked); btn.title=`${cat.label} – ${it.label} – ${dayLabel(d)}`; btn.textContent=checked?'✓':''; btn.addEventListener('click',()=>{ state.checks[rowIndex][d]=!state.checks[rowIndex][d]; save(); renderCategoryProgress(); btn.classList.toggle('checked'); btn.textContent=state.checks[rowIndex][d]?'✓':''; btn.setAttribute('aria-checked', state.checks[rowIndex][d]); }); const box=document.createElement('div'); box.className='box'; box.appendChild(btn); td.appendChild(box);
-        // make entire cell clickable to avoid overlay issues
-        td.addEventListener('click', ()=> { btn.click(); });
-        tr.appendChild(td);} gridBody.appendChild(tr); rowIndex++; });
+      const catTr=document.createElement('tr'); catTr.className='cat-row';
+      const catTd=document.createElement('td'); catTd.colSpan=(end-start)+1; catTd.textContent=cat.label;
+      catTr.appendChild(catTd); gridBody.appendChild(catTr);
+
+      cat.items.forEach((it)=>{
+        const tr=document.createElement('tr'); const left=document.createElement('td');
+        left.className='section'; left.textContent=it.label; tr.appendChild(left);
+
+        for(let d=start; d<end; d++){
+          const td=document.createElement('td'); td.className='cell';
+          const btn=document.createElement('div'); const checked=state.checks[rowIndex][d];
+          btn.className='check'+(checked?' checked':''); btn.setAttribute('role','checkbox'); btn.setAttribute('aria-checked',checked);
+          btn.title=`${cat.label} – ${it.label} – ${dayLabel(d)}`; btn.textContent=checked?'✓':'';
+          btn.addEventListener('click',()=>{
+            state.checks[rowIndex][d] = !state.checks[rowIndex][d];
+            save();
+            btn.classList.toggle('checked');
+            btn.textContent = state.checks[rowIndex][d] ? '✓' : '';
+            btn.setAttribute('aria-checked', state.checks[rowIndex][d]);
+            renderCategoryProgress();
+            renderStreak();
+          });
+          const box=document.createElement('div'); box.className='box'; box.appendChild(btn);
+          td.appendChild(box);
+          // make the whole cell clickable (mobile-friendly)
+          td.addEventListener('click', ()=> { btn.click(); });
+          tr.appendChild(td);
+        }
+        gridBody.appendChild(tr);
+        rowIndex++;
+      });
     });
   }
-  function renderCategoryProgress(){ CATEGORIES.forEach((cat,cIdx)=>{ const idxs=ITEMS.map((it,idx)=>it.catIndex===cIdx?idx:-1).filter(i=>i!==-1); const total=idxs.length*DAYS; const done=idxs.reduce((a,idx)=>a+state.checks[idx].filter(Boolean).length,0); const pct= total? Math.round((done/total)*100):0; const bar=document.querySelector('#bar-'+cat.key); const txt=document.querySelector('#pct-'+cat.key); if(bar) bar.style.width=pct+'%'; if(txt) txt.textContent=pct+'%'; }); }
-  function render(){ startDateInput.value=state.start; const weekOffset=Math.floor(currentDayIndex()/7)*7; weekSelect.value=String(weekOffset); buildWeek(weekOffset); renderCategoryProgress(); }
+
+  function renderCategoryProgress(){
+    // per-category % = (checked items in category) / (items * DAYS)
+    CATEGORIES.forEach((cat,cIdx)=>{
+      const idxs = ITEMS.map((it,idx)=>it.catIndex===cIdx?idx:-1).filter(i=>i!==-1);
+      const total = idxs.length * DAYS;
+      const done = idxs.reduce((a,idx)=>a + state.checks[idx].filter(Boolean).length, 0);
+      const pct = total ? Math.round((done/total)*100) : 0;
+      const bar=document.querySelector('#bar-'+cat.key);
+      const txt=document.querySelector('#pct-'+cat.key);
+      if(bar) bar.style.width=pct+'%';
+      if(txt) txt.textContent=pct+'%';
+    });
+  }
+
+  function anyCheckedOnDay(dayIdx){
+    return state.checks.some(itemArr => itemArr[dayIdx]);
+  }
+  function calcStreak(){
+    // consecutive days starting at day 0 until a miss, up to "today"
+    let streak = 0;
+    const today = currentDayIndex();
+    for(let d=0; d<=today; d++){
+      if(anyCheckedOnDay(d)) streak++;
+      else break;
+    }
+    return streak;
+  }
+  function renderStreak(){
+    const badge = document.getElementById('streakCount');
+    if(!badge) return;
+    badge.textContent = String(calcStreak());
+  }
+
+  function render(){
+    startDateInput.value=state.start;
+    const weekOffset=Math.floor(currentDayIndex()/7)*7;
+    weekSelect.value=String(weekOffset);
+    buildWeek(weekOffset);
+    renderCategoryProgress();
+    renderStreak();
+  }
+
+  // controls
   startDateInput.addEventListener('change',e=>setStartDate(e.target.value));
   weekSelect.addEventListener('change',e=>{ buildWeek(parseInt(e.target.value,10)); });
   document.querySelector('#todayBtn').addEventListener('click',()=>{ render(); });
-  document.querySelector('#resetBtn').addEventListener('click',()=>{ if(confirm('Reset your 21‑day run? This clears all checkmarks.')){ const startISO=new Date().toISOString().slice(0,10); state.start=startISO; state.checks=Array.from({length:ITEMS.length},()=>Array(DAYS).fill(false)); save(); render(); }});
-  document.querySelector('#exportBtn').addEventListener('click',()=>{ const blob=new Blob([JSON.stringify(state,null,2)],{type:'application/json'}); const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download='momentum-data.json'; a.click(); URL.revokeObjectURL(url); });
+  document.querySelector('#resetBtn').addEventListener('click',()=>{
+    if(confirm('Reset your 21-day run? This clears all checkmarks.')){
+      const startISO=new Date().toISOString().slice(0,10);
+      state.start=startISO;
+      state.checks=Array.from({length:ITEMS.length},()=>Array(DAYS).fill(false));
+      save(); render();
+    }
+  });
+  document.querySelector('#exportBtn').addEventListener('click',()=>{
+    const blob=new Blob([JSON.stringify(state,null,2)],{type:'application/json'});
+    const url=URL.createObjectURL(blob); const a=document.createElement('a');
+    a.href=url; a.download='momentum-data.json'; a.click(); URL.revokeObjectURL(url);
+  });
   document.querySelector('#importBtn').addEventListener('click',()=>document.querySelector('#importInput').click());
-  document.querySelector('#importInput').addEventListener('change',async(e)=>{ const file=e.target.files[0]; if(!file) return; try{ const text=await file.text(); const data=JSON.parse(text); if(!data.start||!Array.isArray(data.checks)) throw new Error('Invalid file'); localStorage.setItem(STORAGE_KEY, JSON.stringify(data)); location.reload(); }catch(err){ alert('Could not import file.'); }});
+  document.querySelector('#importInput').addEventListener('change',async(e)=>{
+    const file=e.target.files[0]; if(!file) return;
+    try{
+      const text=await file.text(); const data=JSON.parse(text);
+      if(!data.start||!Array.isArray(data.checks)) throw new Error('Invalid file');
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(data)); location.reload();
+    }catch(err){ alert('Could not import file.'); }
+  });
 
   // ====== TASKS ======
   const TASKS_KEY = 'momentum.tasks.v1';
   let tasks = loadTasks();
   function loadTasks(){ try{ return JSON.parse(localStorage.getItem(TASKS_KEY)) || []; }catch(e){ return []; } }
   function saveTasks(){ localStorage.setItem(TASKS_KEY, JSON.stringify(tasks)); }
-
   function nextId(){ return Date.now()+Math.random().toString(16).slice(2); }
 
-  function addTask(title, low=false, cat='Other'){
-    const ranked = tasks.filter(t=>!t.completed && !t.low);
-    const newRank = ranked.length + 1; // default lowest among ranked
-    const t = { id: nextId(), title: title.trim(), low, completed:false, rank: low? null : newRank, createdAt: Date.now(), cat };
-    tasks.push(t); saveTasks(); renderTasks();
-  };
+  // default new task -> LOW
+  function addTask(title, low=true, cat='Other'){
+    const t = { id: nextId(), title: title.trim(), low:true, completed:false, rank:null, createdAt: Date.now(), cat };
     tasks.push(t); saveTasks(); renderTasks();
   }
 
   function setRank(id, newRank){
-    // Only for active, non-low tasks
     const act = tasks.filter(t=>!t.completed && !t.low).sort((a,b)=>a.rank-b.rank);
-    const maxRank = act.length; if(newRank<1) newRank=1; if(newRank>maxRank) newRank=maxRank;
+    const maxRank = act.length;
+    if(newRank<1) newRank=1; if(newRank>maxRank) newRank=maxRank;
     const target = tasks.find(t=>t.id===id); if(!target) return;
     const oldRank = target.rank;
     if(oldRank===newRank) return;
-    // Shift others
     act.forEach(t=>{
       if(t.id===id) return;
-      if(newRank < oldRank){ // moving up
-        if(t.rank >= newRank && t.rank < oldRank) t.rank++;
-      } else { // moving down
-        if(t.rank <= newRank && t.rank > oldRank) t.rank--;
-      }
+      if(newRank < oldRank){ if(t.rank >= newRank && t.rank < oldRank) t.rank++; }
+      else { if(t.rank <= newRank && t.rank > oldRank) t.rank--; }
     });
-    target.rank = newRank;
-    saveTasks(); renderTasks();
+    target.rank = newRank; saveTasks(); renderTasks();
   }
 
-  function promoteFromLow(id){ const t=tasks.find(x=>x.id===id); if(!t) return; t.low=false; const ranked=tasks.filter(k=>!k.completed && !k.low); t.rank=ranked.length+1; saveTasks(); renderTasks(); }
-  function demoteToLow(id){ const t=tasks.find(x=>x.id===id); if(!t) return; // compact ranks
-    if(t.rank!=null){ const act=tasks.filter(a=>!a.completed && !a.low).sort((a,b)=>a.rank-b.rank); act.forEach(a=>{ if(a.rank>t.rank) a.rank--; }); }
-    t.low=true; t.rank=null; saveTasks(); renderTasks(); }
-  function completeTask(id){ const t=tasks.find(x=>x.id===id); if(!t) return; t.completed=true; t.completedAt=Date.now(); // compact ranks if needed
-    if(t.rank!=null){ const act=tasks.filter(a=>!a.completed && !a.low).sort((a,b)=>a.rank-b.rank); act.forEach(a=>{ if(a.rank>t.rank) a.rank--; }); }
-    t.rank=null; saveTasks(); renderTasks(); }
+  function promoteFromLow(id){
+    const t=tasks.find(x=>x.id===id); if(!t) return;
+    t.low=false;
+    const ranked=tasks.filter(k=>!k.completed && !k.low);
+    t.rank = ranked.length + 1; // goes to bottom of ranked
+    saveTasks(); renderTasks();
+  }
+  function demoteToLow(id){
+    const t=tasks.find(x=>x.id===id); if(!t) return;
+    if(t.rank!=null){
+      const act=tasks.filter(a=>!a.completed && !a.low).sort((a,b)=>a.rank-b.rank);
+      act.forEach(a=>{ if(a.rank>t.rank) a.rank--; });
+    }
+    t.low=true; t.rank=null; saveTasks(); renderTasks();
+  }
+  function completeTask(id){
+    const t=tasks.find(x=>x.id===id); if(!t) return;
+    t.completed=true; t.completedAt=Date.now();
+    if(t.rank!=null){
+      const act=tasks.filter(a=>!a.completed && !a.low).sort((a,b)=>a.rank-b.rank);
+      act.forEach(a=>{ if(a.rank>t.rank) a.rank--; });
+    }
+    t.rank=null; saveTasks(); renderTasks();
+  }
   function deleteTask(id){ tasks = tasks.filter(t=>t.id!==id); saveTasks(); renderTasks(); }
   function editTitle(id, val){ const t=tasks.find(x=>x.id===id); if(!t) return; t.title=val; saveTasks(); }
+
+  function taskRow(t, showRank=false, completed=false){
+    const row = document.createElement('div'); row.className='task';
+    if(showRank){
+      const num = document.createElement('input'); num.type='number'; num.min='1'; num.value=t.rank||1; num.style.width='64px'; num.title='Priority (1 = highest)';
+      num.addEventListener('change', ()=> setRank(t.id, parseInt(num.value,10)) );
+      row.appendChild(num);
+    }
+    const cat = document.createElement('select');
+    ['Physical','Emotional','Other'].forEach(v=>{ const o=document.createElement('option'); o.value=v; o.textContent=v; cat.appendChild(o); });
+    cat.value = t.cat || 'Other';
+    cat.addEventListener('change', ()=> { t.cat = cat.value; saveTasks(); });
+    row.appendChild(cat);
+
+    const txt = document.createElement('input'); txt.type='text'; txt.value=t.title; txt.placeholder='Task'; txt.style.flex='1';
+    txt.addEventListener('change', ()=> editTitle(t.id, txt.value));
+    row.appendChild(txt);
+
+    if(!completed){
+      if(t.low){
+        const up = document.createElement('button'); up.textContent='Promote'; up.addEventListener('click', ()=> promoteFromLow(t.id)); row.appendChild(up);
+      } else {
+        const down = document.createElement('button'); down.textContent='Low'; down.addEventListener('click', ()=> demoteToLow(t.id)); row.appendChild(down);
+      }
+      const done = document.createElement('button'); done.textContent='Done'; done.addEventListener('click', ()=> completeTask(t.id)); row.appendChild(done);
+    } else {
+      const del = document.createElement('button'); del.textContent='Delete'; del.addEventListener('click', ()=> deleteTask(t.id)); row.appendChild(del);
+    }
+    return row;
+  }
 
   function renderTasks(){
     const top3El = document.getElementById('list-top3');
@@ -290,42 +448,14 @@
     done.forEach(t=> doneEl.appendChild(taskRow(t, false, true)) );
   }
 
-  function taskRow(t, showRank=false, completed=false){
-    const row = document.createElement('div'); row.className='task';
-    if(showRank){
-      const num = document.createElement('input'); num.type='number'; num.min='1'; num.value=t.rank||1; num.style.width='64px'; num.title='Priority (1 = highest)';
-      num.addEventListener('change', ()=> setRank(t.id, parseInt(num.value,10)) );
-      row.appendChild(num);
-    }
-    const cat = document.createElement('select');
-    ['Physical','Emotional','Other'].forEach(v=>{ const o=document.createElement('option'); o.value=v; o.textContent=v; cat.appendChild(o); });
-    cat.value = t.cat || 'Other';
-    cat.addEventListener('change', ()=> { t.cat = cat.value; saveTasks(); });
-    row.appendChild(cat);
-    const txt = document.createElement('input'); txt.type='text'; txt.value=t.title; txt.placeholder='Task'; txt.addEventListener('change', ()=> editTitle(t.id, txt.value)); txt.style.flex='1'; row.appendChild(txt);
-
-    if(!completed){
-      if(t.low){
-        const up = document.createElement('button'); up.textContent='Promote'; up.addEventListener('click', ()=> promoteFromLow(t.id)); row.appendChild(up);
-      } else {
-        const down = document.createElement('button'); down.textContent='Low'; down.addEventListener('click', ()=> demoteToLow(t.id)); row.appendChild(down);
-      }
-      const done = document.createElement('button'); done.textContent='Done'; done.addEventListener('click', ()=> completeTask(t.id)); row.appendChild(done);
-    } else {
-      const del = document.createElement('button'); del.textContent='Delete'; del.addEventListener('click', ()=> deleteTask(t.id)); row.appendChild(del);
-    }
-    return row;
-  }
-
   // Add task handlers
   document.getElementById('task-add').addEventListener('click', ()=>{
     const title = document.getElementById('task-title').value.trim();
-    const low = document.getElementById('task-low').checked;
     const cat = document.getElementById('task-cat').value;
     if(!title) return alert('Enter a task title');
-    addTask(title, low, cat);
+    addTask(title, true, cat); // default low
     document.getElementById('task-title').value='';
-    document.getElementById('task-low').checked=false;
+    document.getElementById('task-cat').value='Other';
   });
 
   // Tabs logic
@@ -336,7 +466,7 @@
   tabTracker.addEventListener('click', ()=>{ tabTracker.classList.add('active'); tabTasks.classList.remove('active'); viewTracker.classList.remove('hidden'); viewTasks.classList.add('hidden'); });
   tabTasks.addEventListener('click', ()=>{ tabTasks.classList.add('active'); tabTracker.classList.remove('active'); viewTasks.classList.remove('hidden'); viewTracker.classList.add('hidden'); renderTasks(); });
 
-  // initial renders
+  // Initial render
   render();
   renderTasks();
 })();
