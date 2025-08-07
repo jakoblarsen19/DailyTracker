@@ -1,0 +1,288 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>21‑Day Momentum Tracker</title>
+  <!-- iOS standalone when added to Home Screen -->
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Momentum" />
+  <meta name="theme-color" content="#0f172a" />
+  <style>
+    :root{
+      --bg: #0b1221;
+      --panel: #0f172a;
+      --muted: #94a3b8;
+      --text: #e5e7eb;
+      --accent: #60a5fa;
+      --accent2: #34d399;
+      --danger: #ef4444;
+      --ok: #22c55e;
+      --grid: rgba(148,163,184,.2);
+      --radius: 18px;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{margin:0;background:linear-gradient(180deg,#0b1221 0%, #0b1221 50%, #0d1426 100%);color:var(--text);font:16px/1.4 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Inter, Helvetica, Arial, sans-serif;-webkit-font-smoothing:antialiased}
+    .wrap{max-width:980px;margin:0 auto;padding:env(safe-area-inset-top) 16px calc(24px + env(safe-area-inset-bottom));}
+    header{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:16px 0 8px}
+    h1{font-size:22px;margin:0;font-weight:700;letter-spacing:.2px}
+    .sub{color:var(--muted);font-size:13px}
+    .row{display:flex;gap:12px;flex-wrap:wrap}
+    .card{background:rgba(15,23,42,.8);backdrop-filter: blur(8px);border:1px solid rgba(148,163,184,.15);padding:14px;border-radius:var(--radius);}
+    .controls{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+    button, select, input[type="date"]{background:#0b1221;border:1px solid rgba(148,163,184,.28);color:var(--text);height:36px;border-radius:12px;padding:0 12px;cursor:pointer}
+    button.primary{background:linear-gradient(135deg,var(--accent),var(--accent2));border:none;color:#061017;font-weight:700}
+    button.link{background:transparent;border:none;color:var(--muted);text-decoration:underline;padding:0;height:auto}
+    .grid{width:100%;overflow:auto;border-radius:var(--radius);border:1px solid rgba(148,163,184,.15)}
+    table{border-collapse:separate;border-spacing:0;width:100%;background:rgba(2,6,23,.6);}
+    thead th{position:sticky;top:0;background:linear-gradient(180deg, rgba(15,23,42,.9), rgba(15,23,42,.75));backdrop-filter: blur(8px);}
+    th, td{padding:12px;border-bottom:1px solid var(--grid);border-right:1px solid var(--grid);}
+    th:first-child, td:first-child{position:sticky;left:0;background:linear-gradient(180deg, rgba(15,23,42,.95), rgba(15,23,42,.75));backdrop-filter: blur(8px);z-index:2}
+    th:last-child, td:last-child{border-right:0}
+    tr:last-child td{border-bottom:0}
+    th{font-weight:600;color:#c7d2fe}
+    .section{white-space:nowrap}
+    .pill{display:inline-flex;align-items:center;gap:8px;border:1px solid rgba(148,163,184,.25);padding:8px 10px;border-radius:999px;font-size:13px;color:var(--muted)}
+    .dot{width:8px;height:8px;border-radius:999px;background:var(--muted)}
+    .dot.energy{background:var(--accent)}
+    .dot.backlog{background:#a78bfa}
+    .dot.purpose{background:var(--accent2)}
+    .box{display:flex;align-items:center;justify-content:center;gap:8px;user-select:none}
+    .check{width:28px;height:28px;border-radius:10px;border:1.5px solid rgba(148,163,184,.45);display:inline-flex;align-items:center;justify-content:center;cursor:pointer;transition:.15s;background:rgba(2,6,23,.35)}
+    .check.checked{border-color:transparent;background:linear-gradient(135deg,var(--accent),var(--accent2));color:#0b1221;font-weight:800}
+    .progress{display:flex;gap:8px;align-items:center}
+    .bar{flex:1;height:10px;border-radius:999px;background:rgba(148,163,184,.18);overflow:hidden}
+    .bar > i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--accent),var(--accent2))}
+    .quote{color:var(--muted);font-size:13px;margin-top:8px}
+    footer{margin-top:16px;color:var(--muted);font-size:12px}
+    .banner{margin-top:6px;background:rgba(96,165,250,.12);border:1px solid rgba(96,165,250,.35);padding:10px 12px;border-radius:12px}
+    .kudos{font-size:12px;color:#a7f3d0}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <div>
+        <h1>21‑Day Momentum Tracker</h1>
+        <div class="sub">Tiny daily actions in three areas: <strong>Energy</strong>, <strong>Backlog</strong>, <strong>Purpose</strong>.</div>
+      </div>
+      <div class="controls">
+        <label class="pill">
+          <span class="dot energy"></span>
+          Start: <input id="startDate" type="date" />
+        </label>
+        <select id="weekSelect" title="Select week">
+          <option value="0">Week 1</option>
+          <option value="7">Week 2</option>
+          <option value="14">Week 3</option>
+        </select>
+        <button class="primary" id="todayBtn">Jump to Today</button>
+      </div>
+    </header>
+
+    <div class="row" style="margin:6px 0 14px">
+      <div class="card" style="flex:1;min-width:260px">
+        <div class="progress">
+          <div class="pill"><span class="dot energy"></span>Energy</div>
+          <div class="pill"><span class="dot backlog"></span>Backlog</div>
+          <div class="pill"><span class="dot purpose"></span>Purpose</div>
+        </div>
+        <div class="progress" style="margin-top:10px">
+          <div class="bar"><i id="barTotal"></i></div>
+          <div id="pct" style="width:56px;text-align:right"></div>
+        </div>
+        <div class="quote">Small wins daily = big change over time.</div>
+      </div>
+      <div class="card" style="display:flex;gap:10px;align-items:center">
+        <button id="resetBtn">Reset 21‑day run</button>
+        <button id="exportBtn">Export</button>
+        <input id="importInput" type="file" accept="application/json" style="display:none" />
+        <button id="importBtn">Import</button>
+      </div>
+    </div>
+
+    <div class="banner" id="iosHint" style="display:none">
+      To install: tap the <strong>Share</strong> icon in Safari → <strong>Add to Home Screen</strong>. This runs full‑screen on iPhone.
+    </div>
+
+    <div class="grid card">
+      <table id="grid">
+        <thead>
+          <tr>
+            <th class="section">Habit Area</th>
+            <th>Day 1</th><th>Day 2</th><th>Day 3</th><th>Day 4</th><th>Day 5</th><th>Day 6</th><th>Day 7</th>
+          </tr>
+        </thead>
+        <tbody id="tbody"></tbody>
+      </table>
+    </div>
+
+    <footer>
+      <div class="kudos" id="streak"></div>
+      <div style="margin-top:8px">Data is stored locally on your device via <code>localStorage</code>. Export a backup if needed.</div>
+    </footer>
+  </div>
+
+<script>
+(function(){
+  const SECTIONS = [
+    { key: 'energy', label: 'Physical Energy' },
+    { key: 'backlog', label: 'Backlog Clearing' },
+    { key: 'purpose', label: 'Purpose' }
+  ];
+  const DAYS = 21; // total run
+
+  const el = (sel) => document.querySelector(sel);
+  const gridBody = el('#tbody');
+  const bar = el('#barTotal');
+  const pct = el('#pct');
+  const startDateInput = el('#startDate');
+  const weekSelect = el('#weekSelect');
+  const streakEl = el('#streak');
+
+  const STORAGE_KEY = 'momentum.v1';
+  const state = load() || initState();
+
+  function initState(){
+    const today = new Date();
+    const startISO = today.toISOString().slice(0,10);
+    return {
+      start: startISO,
+      checks: Array.from({length: SECTIONS.length}, () => Array(DAYS).fill(false))
+    };
+  }
+
+  function load(){
+    try{ return JSON.parse(localStorage.getItem(STORAGE_KEY)); }catch(e){ return null; }
+  }
+  function save(){ localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }
+
+  function setStartDate(iso){ state.start = iso; save(); render(); }
+
+  function currentDayIndex(){
+    const s = new Date(state.start + 'T00:00:00');
+    const now = new Date();
+    const diff = Math.floor((now - s) / (1000*60*60*24));
+    return Math.min(Math.max(diff, 0), DAYS-1);
+  }
+
+  function dayLabel(i){ return 'Day ' + (i+1); }
+
+  function buildWeek(offset){
+    gridBody.innerHTML = '';
+    const start = offset;
+    const end = Math.min(offset + 7, DAYS);
+
+    // header labels
+    const thead = document.querySelector('thead tr');
+    thead.innerHTML = '<th class="section">Habit Area</th>' +
+      Array.from({length: end-start}, (_,i)=>`<th>${dayLabel(start+i)}</th>`).join('');
+
+    // rows
+    SECTIONS.forEach((sec, rIdx) => {
+      const tr = document.createElement('tr');
+      const left = document.createElement('td');
+      left.className = 'section';
+      left.textContent = sec.label;
+      tr.appendChild(left);
+
+      for(let d=start; d<end; d++){
+        const td = document.createElement('td');
+        const btn = document.createElement('div');
+        btn.className = 'check' + (state.checks[rIdx][d] ? ' checked' : '');
+        btn.setAttribute('role','checkbox');
+        btn.setAttribute('aria-checked', state.checks[rIdx][d]);
+        btn.title = sec.label + ' – ' + dayLabel(d);
+        btn.textContent = state.checks[rIdx][d] ? '✓' : '';
+        btn.addEventListener('click', () => {
+          state.checks[rIdx][d] = !state.checks[rIdx][d];
+          save();
+          renderProgress();
+          btn.classList.toggle('checked');
+          btn.textContent = state.checks[rIdx][d] ? '✓' : '';
+          btn.setAttribute('aria-checked', state.checks[rIdx][d]);
+        });
+        const box = document.createElement('div');
+        box.className = 'box';
+        box.appendChild(btn);
+        td.appendChild(box);
+        tr.appendChild(td);
+      }
+      gridBody.appendChild(tr);
+    });
+  }
+
+  function renderProgress(){
+    const flat = state.checks.flat();
+    const total = flat.length;
+    const done = flat.filter(Boolean).length;
+    const pctVal = Math.round((done/total)*100);
+    bar.style.width = pctVal + '%';
+    pct.textContent = pctVal + '%';
+
+    // streak (today across 3 checks)
+    const todayIdx = currentDayIndex();
+    const todayChecks = state.checks.map(row => row[todayIdx]);
+    const todayDone = todayChecks.filter(Boolean).length;
+    streakEl.textContent = `Today: ${todayDone}/3 completed (Day ${todayIdx+1} of 21)`;
+  }
+
+  function render(){
+    startDateInput.value = state.start;
+    const todayIdx = currentDayIndex();
+    const weekOffset = Math.floor(todayIdx/7)*7;
+    weekSelect.value = String(weekOffset);
+    buildWeek(weekOffset);
+    renderProgress();
+  }
+
+  // controls
+  startDateInput.addEventListener('change', e => setStartDate(e.target.value));
+  weekSelect.addEventListener('change', e => { buildWeek(parseInt(e.target.value,10)); });
+  el('#todayBtn').addEventListener('click', () => { render(); });
+  el('#resetBtn').addEventListener('click', () => {
+    if(confirm('Reset your 21‑day run? This clears all checkmarks.')){
+      const startISO = new Date().toISOString().slice(0,10);
+      state.start = startISO;
+      state.checks = Array.from({length: SECTIONS.length}, () => Array(DAYS).fill(false));
+      save();
+      render();
+    }
+  });
+
+  // export / import
+  el('#exportBtn').addEventListener('click', () => {
+    const blob = new Blob([JSON.stringify(state,null,2)], {type:'application/json'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = 'momentum-data.json'; a.click();
+    URL.revokeObjectURL(url);
+  });
+  el('#importBtn').addEventListener('click', () => el('#importInput').click());
+  el('#importInput').addEventListener('change', async (e) => {
+    const file = e.target.files[0];
+    if(!file) return;
+    try{
+      const text = await file.text();
+      const data = JSON.parse(text);
+      if(!data.start || !Array.isArray(data.checks)) throw new Error('Invalid file');
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+      location.reload();
+    }catch(err){
+      alert('Could not import file.');
+    }
+  });
+
+  // iOS hint (only show in Safari on iPhone)
+  const ua = navigator.userAgent;
+  const isIOS = /iPhone|iPad|iPod/.test(ua);
+  const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
+  if(isIOS && !isStandalone){ document.getElementById('iosHint').style.display = 'block'; }
+
+  render();
+})();
+</script>
+</body>
+</html>
