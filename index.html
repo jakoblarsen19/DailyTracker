@@ -100,7 +100,6 @@
     /* Streak badge */
     .streak{display:flex;align-items:center;gap:6px;font-weight:700}
 
-    /* Motion preference */
     @media (prefers-reduced-motion: reduce){
       .check{transition:none}
     }
@@ -269,28 +268,30 @@
       catTr.appendChild(catTd); gridBody.appendChild(catTr);
 
       cat.items.forEach((it)=>{
+        const r = rowIndex; // capture row index for this item
         const tr=document.createElement('tr'); const left=document.createElement('td');
         left.className='section'; left.textContent=it.label; tr.appendChild(left);
 
         for(let d=start; d<end; d++){
+          const dayIndex = d; // capture day index
           const td=document.createElement('td'); td.className='cell';
-          const checked=state.checks[rowIndex][d];
+          const checked=state.checks[r][dayIndex];
           const btn=document.createElement('button');
           btn.className='check';
           btn.type='button';
           btn.setAttribute('aria-pressed', checked ? 'true' : 'false');
-          btn.title=`${cat.label} – ${it.label} – ${dayLabel(d)}`;
+          btn.title=`${cat.label} – ${it.label} – ${dayLabel(dayIndex)}`;
           btn.textContent = checked ? '✓' : '';
           btn.addEventListener('click',(ev)=>{
             ev.stopPropagation();
-            const newVal = ! (btn.getAttribute('aria-pressed') === 'true');
-            state.checks[rowIndex][d] = newVal;
+            const newVal = !(btn.getAttribute('aria-pressed') === 'true');
+            state.checks[r][dayIndex] = newVal;
             save();
             btn.setAttribute('aria-pressed', newVal ? 'true' : 'false');
             btn.textContent = newVal ? '✓' : '';
             renderCategoryProgress();
             renderStreak();
-          }, {passive:true});
+          });
           const box=document.createElement('div'); box.className='box'; box.appendChild(btn);
           td.appendChild(box);
           tr.appendChild(td);
@@ -346,7 +347,7 @@
   weekSelect.addEventListener('change',e=>{ buildWeek(parseInt(e.target.value,10)); });
   document.querySelector('#todayBtn').addEventListener('click',()=>{ render(); });
   document.querySelector('#resetBtn').addEventListener('click',()=>{
-    if(confirm('Reset your 21-day run? This clears all checkmarks.')){
+    if(confirm('Reset 21-day run? This clears all checkmarks.')){
       const startISO=new Date().toISOString().slice(0,10);
       state.start=startISO;
       state.checks=Array.from({length:ITEMS.length},()=>Array(DAYS).fill(false));
