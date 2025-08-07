@@ -2,12 +2,16 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1, viewport-fit=cover"
+  />
   <title>Daily Momentum Tracker</title>
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="apple-mobile-web-app-title" content="Momentum" />
   <meta name="theme-color" content="#0f172a" />
+  <meta name="color-scheme" content="dark" />
   <style>
     :root{
       --bg: #0b1221; --panel:#0f172a; --muted:#94a3b8; --text:#e5e7eb;
@@ -16,7 +20,13 @@
     }
     *{box-sizing:border-box}
     html,body{height:100%}
-    body{margin:0;background:linear-gradient(180deg,#0b1221 0%, #0d1426 100%);color:var(--text);font:16px/1.45 -apple-system,BlinkMacSystemFont,Inter,Segoe UI,Roboto,Helvetica,Arial,sans-serif;-webkit-font-smoothing:antialiased}
+    body{
+      margin:0;
+      background:linear-gradient(180deg,#0b1221 0%, #0d1426 100%);
+      color:var(--text);
+      font:16px/1.45 -apple-system,BlinkMacSystemFont,Inter,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
+      -webkit-font-smoothing:antialiased;
+    }
     .wrap{max-width:1100px;margin:0 auto;padding:env(safe-area-inset-top) 16px calc(24px + env(safe-area-inset-bottom));}
     header{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:10px 0 12px;flex-wrap:wrap}
     h1{font-size:22px;margin:0;font-weight:700}
@@ -25,8 +35,10 @@
     .card{background:rgba(15,23,42,.8);backdrop-filter: blur(8px);border:1px solid rgba(148,163,184,.15);padding:14px;border-radius:var(--radius)}
     .controls{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
     button, select, input[type="date"], input[type="text"], input[type="number"], textarea{
-      background:#0b1221;border:1px solid rgba(148,163,184,.28);color:var(--text);height:36px;border-radius:12px;padding:0 12px;cursor:pointer
+      background:#0b1221;border:1px solid rgba(148,163,184,.28);color:var(--text);
+      height:36px;border-radius:12px;padding:0 12px;cursor:pointer; touch-action: manipulation;
     }
+    button{min-width:44px; min-height:36px}
     textarea{height:auto;padding:10px;border-radius:12px}
     button.primary{background:linear-gradient(135deg,var(--accent),var(--accent2));border:none;color:#061017;font-weight:700}
 
@@ -38,7 +50,7 @@
 
     /* Grid */
     .grid{width:100%;overflow:auto;border-radius:var(--radius);border:1px solid rgba(148,163,184,.15)}
-    table{border-collapse:separate;border-spacing:0;width:100%;background:rgba(2,6,23,.6)}
+    table{border-collapse:separate;border-spacing:0;width:100%;background:rgba(2,6,23,.6);min-width:700px}
     thead th{position:sticky;top:0;background:linear-gradient(180deg, rgba(15,23,42,.9), rgba(15,23,42,.75));backdrop-filter: blur(8px)}
     th, td{padding:10px;border-bottom:1px solid var(--grid);border-right:1px solid var(--grid)}
     th:first-child, td:first-child{position:sticky;left:0;background:linear-gradient(180deg, rgba(15,23,42,.95), rgba(15,23,42,.75));backdrop-filter: blur(8px);z-index:2}
@@ -48,20 +60,23 @@
     .section{white-space:nowrap}
     .cat-row td{font-weight:700;color:#c7d2fe;background:rgba(96,165,250,.08);border-top:2px solid rgba(148,163,184,.25)}
 
-    /* Check cells */
+    /* Check buttons */
     td{position:relative}
-    .cell{position:relative; z-index:1}
-    .box{display:flex;align-items:center;justify-content:center;gap:8px;user-select:none; pointer-events:auto}
+    .cell{position:relative}
+    .box{display:flex;align-items:center;justify-content:center;gap:8px;user-select:none}
     .check{
-      width:28px;height:28px;border-radius:10px;
-      border:1.5px solid rgba(148,163,184,.45);
       display:inline-flex;align-items:center;justify-content:center;
-      cursor:pointer;transition:.15s;background:rgba(2,6,23,.35)
+      width:44px;height:44px;border-radius:12px;
+      border:1.5px solid rgba(148,163,184,.45);
+      background:rgba(2,6,23,.35);
+      font-size:20px; line-height:1; cursor:pointer; transition:transform .04s ease;
+      -webkit-tap-highlight-color: transparent;
     }
-    .check.checked{
+    .check:active{ transform: scale(0.98); }
+    .check[aria-pressed="true"]{
       border-color:transparent;
       background:linear-gradient(135deg,var(--accent),var(--accent2));
-      color:#0b1221;font-weight:800
+      color:#0b1221; font-weight:800;
     }
 
     /* Progress */
@@ -84,6 +99,11 @@
 
     /* Streak badge */
     .streak{display:flex;align-items:center;gap:6px;font-weight:700}
+
+    /* Motion preference */
+    @media (prefers-reduced-motion: reduce){
+      .check{transition:none}
+    }
   </style>
 </head>
 <body>
@@ -205,7 +225,7 @@
       { key:'sleep', label:'Sleep' }
     ]},
     { key: 'mental', label: 'Mental Energy', items: [
-      { key:'screen', label:'&lt; 2h Screen Time' },
+      { key:'screen', label:'< 2h Screen Time' },
       { key:'journal', label:'Journaling' }
     ]}
   ];
@@ -254,22 +274,25 @@
 
         for(let d=start; d<end; d++){
           const td=document.createElement('td'); td.className='cell';
-          const btn=document.createElement('div'); const checked=state.checks[rowIndex][d];
-          btn.className='check'+(checked?' checked':''); btn.setAttribute('role','checkbox'); btn.setAttribute('aria-checked',checked);
-          btn.title=`${cat.label} – ${it.label} – ${dayLabel(d)}`; btn.textContent=checked?'✓':'';
-          btn.addEventListener('click',()=>{
-            state.checks[rowIndex][d] = !state.checks[rowIndex][d];
+          const checked=state.checks[rowIndex][d];
+          const btn=document.createElement('button');
+          btn.className='check';
+          btn.type='button';
+          btn.setAttribute('aria-pressed', checked ? 'true' : 'false');
+          btn.title=`${cat.label} – ${it.label} – ${dayLabel(d)}`;
+          btn.textContent = checked ? '✓' : '';
+          btn.addEventListener('click',(ev)=>{
+            ev.stopPropagation();
+            const newVal = ! (btn.getAttribute('aria-pressed') === 'true');
+            state.checks[rowIndex][d] = newVal;
             save();
-            btn.classList.toggle('checked');
-            btn.textContent = state.checks[rowIndex][d] ? '✓' : '';
-            btn.setAttribute('aria-checked', state.checks[rowIndex][d]);
+            btn.setAttribute('aria-pressed', newVal ? 'true' : 'false');
+            btn.textContent = newVal ? '✓' : '';
             renderCategoryProgress();
             renderStreak();
-          });
+          }, {passive:true});
           const box=document.createElement('div'); box.className='box'; box.appendChild(btn);
           td.appendChild(box);
-          // make the whole cell clickable (mobile-friendly)
-          td.addEventListener('click', ()=> { btn.click(); });
           tr.appendChild(td);
         }
         gridBody.appendChild(tr);
@@ -279,7 +302,6 @@
   }
 
   function renderCategoryProgress(){
-    // per-category % = (checked items in category) / (items * DAYS)
     CATEGORIES.forEach((cat,cIdx)=>{
       const idxs = ITEMS.map((it,idx)=>it.catIndex===cIdx?idx:-1).filter(i=>i!==-1);
       const total = idxs.length * DAYS;
@@ -296,7 +318,6 @@
     return state.checks.some(itemArr => itemArr[dayIdx]);
   }
   function calcStreak(){
-    // consecutive days starting at day 0 until a miss, up to "today"
     let streak = 0;
     const today = currentDayIndex();
     for(let d=0; d<=today; d++){
@@ -379,7 +400,7 @@
     const t=tasks.find(x=>x.id===id); if(!t) return;
     t.low=false;
     const ranked=tasks.filter(k=>!k.completed && !k.low);
-    t.rank = ranked.length + 1; // goes to bottom of ranked
+    t.rank = ranked.length + 1; // bottom of ranked
     saveTasks(); renderTasks();
   }
   function demoteToLow(id){
