@@ -46,7 +46,10 @@
     .section{white-space:nowrap}
     .cat-row td{font-weight:700;color:#c7d2fe;background:rgba(96,165,250,.08);border-top:2px solid rgba(148,163,184,.25)}
 
-    .box{display:flex;align-items:center;justify-content:center;gap:8px;user-select:none}
+    .box{display:flex;align-items:center;justify-content:center;gap:8px;user-select:none; pointer-events:auto}
+    td{position:relative}
+    .cell{position:relative; z-index:1}
+    .cell-overlay{position:absolute; inset:0}
     .check{width:28px;height:28px;border-radius:10px;border:1.5px solid rgba(148,163,184,.45);display:inline-flex;align-items:center;justify-content:center;cursor:pointer;transition:.15s;background:rgba(2,6,23,.35)}
     .check.checked{border-color:transparent;background:linear-gradient(135deg,var(--accent),var(--accent2));color:#0b1221;font-weight:800}
 
@@ -141,6 +144,11 @@
         <div class="section-title">Add Task</div>
         <div class="task-inputs">
           <input id="task-title" type="text" placeholder="Task title" style="flex:1" />
+          <select id="task-cat" title="Category">
+            <option value="Other">Other</option>
+            <option value="Physical">Physical</option>
+            <option value="Emotional">Emotional</option>
+          </select>
           <label style="display:flex;align-items:center;gap:6px"><input id="task-low" type="checkbox" /> Low priority</label>
           <button id="task-add" class="primary">Add</button>
         </div>
@@ -203,7 +211,10 @@
     CATEGORIES.forEach((cat)=>{
       const catTr=document.createElement('tr'); catTr.className='cat-row'; const catTd=document.createElement('td'); catTd.colSpan=(end-start)+1; catTd.textContent=cat.label; catTr.appendChild(catTd); gridBody.appendChild(catTr);
       cat.items.forEach((it)=>{ const tr=document.createElement('tr'); const left=document.createElement('td'); left.className='section'; left.textContent=it.label; tr.appendChild(left);
-        for(let d=start; d<end; d++){ const td=document.createElement('td'); const btn=document.createElement('div'); const checked=state.checks[rowIndex][d]; btn.className='check'+(checked?' checked':''); btn.setAttribute('role','checkbox'); btn.setAttribute('aria-checked',checked); btn.title=`${cat.label} – ${it.label} – ${dayLabel(d)}`; btn.textContent=checked?'✓':''; btn.addEventListener('click',()=>{ state.checks[rowIndex][d]=!state.checks[rowIndex][d]; save(); renderCategoryProgress(); btn.classList.toggle('checked'); btn.textContent=state.checks[rowIndex][d]?'✓':''; btn.setAttribute('aria-checked', state.checks[rowIndex][d]); }); const box=document.createElement('div'); box.className='box'; box.appendChild(btn); td.appendChild(box); tr.appendChild(td);} gridBody.appendChild(tr); rowIndex++; });
+        for(let d=start; d<end; d++){ const td=document.createElement('td'); td.className='cell'; const btn=document.createElement('div'); const checked=state.checks[rowIndex][d]; btn.className='check'+(checked?' checked':''); btn.setAttribute('role','checkbox'); btn.setAttribute('aria-checked',checked); btn.title=`${cat.label} – ${it.label} – ${dayLabel(d)}`; btn.textContent=checked?'✓':''; btn.addEventListener('click',()=>{ state.checks[rowIndex][d]=!state.checks[rowIndex][d]; save(); renderCategoryProgress(); btn.classList.toggle('checked'); btn.textContent=state.checks[rowIndex][d]?'✓':''; btn.setAttribute('aria-checked', state.checks[rowIndex][d]); }); const box=document.createElement('div'); box.className='box'; box.appendChild(btn); td.appendChild(box);
+        // make entire cell clickable to avoid overlay issues
+        td.addEventListener('click', ()=> { btn.click(); });
+        tr.appendChild(td);} gridBody.appendChild(tr); rowIndex++; });
     });
   }
   function renderCategoryProgress(){ CATEGORIES.forEach((cat,cIdx)=>{ const idxs=ITEMS.map((it,idx)=>it.catIndex===cIdx?idx:-1).filter(i=>i!==-1); const total=idxs.length*DAYS; const done=idxs.reduce((a,idx)=>a+state.checks[idx].filter(Boolean).length,0); const pct= total? Math.round((done/total)*100):0; const bar=document.querySelector('#bar-'+cat.key); const txt=document.querySelector('#pct-'+cat.key); if(bar) bar.style.width=pct+'%'; if(txt) txt.textContent=pct+'%'; }); }
@@ -224,10 +235,12 @@
 
   function nextId(){ return Date.now()+Math.random().toString(16).slice(2); }
 
-  function addTask(title, low=false){
+  function addTask(title, low=false, cat='Other'){
     const ranked = tasks.filter(t=>!t.completed && !t.low);
     const newRank = ranked.length + 1; // default lowest among ranked
-    const t = { id: nextId(), title: title.trim(), low, completed:false, rank: low? null : newRank, createdAt: Date.now() };
+    const t = { id: nextId(), title: title.trim(), low, completed:false, rank: low? null : newRank, createdAt: Date.now(), cat };
+    tasks.push(t); saveTasks(); renderTasks();
+  };
     tasks.push(t); saveTasks(); renderTasks();
   }
 
@@ -284,6 +297,11 @@
       num.addEventListener('change', ()=> setRank(t.id, parseInt(num.value,10)) );
       row.appendChild(num);
     }
+    const cat = document.createElement('select');
+    ['Physical','Emotional','Other'].forEach(v=>{ const o=document.createElement('option'); o.value=v; o.textContent=v; cat.appendChild(o); });
+    cat.value = t.cat || 'Other';
+    cat.addEventListener('change', ()=> { t.cat = cat.value; saveTasks(); });
+    row.appendChild(cat);
     const txt = document.createElement('input'); txt.type='text'; txt.value=t.title; txt.placeholder='Task'; txt.addEventListener('change', ()=> editTitle(t.id, txt.value)); txt.style.flex='1'; row.appendChild(txt);
 
     if(!completed){
@@ -303,8 +321,9 @@
   document.getElementById('task-add').addEventListener('click', ()=>{
     const title = document.getElementById('task-title').value.trim();
     const low = document.getElementById('task-low').checked;
+    const cat = document.getElementById('task-cat').value;
     if(!title) return alert('Enter a task title');
-    addTask(title, low);
+    addTask(title, low, cat);
     document.getElementById('task-title').value='';
     document.getElementById('task-low').checked=false;
   });
